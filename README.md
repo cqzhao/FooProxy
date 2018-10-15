@@ -47,7 +47,9 @@
  
 ![流程图](https://github.com/01ly/FooProxy/blob/dev/chart.png)
 
-![实现步骤](https://github.com/01ly/FooProxy/blob/dev/pic/works.png)
+实现步骤：
+
+![实现步骤](https://github.com/01ly/FooProxy/blob/master/pic/works.png)
 
 1.**采集数据(Collector)**
 
