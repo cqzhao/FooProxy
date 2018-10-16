@@ -10,6 +10,7 @@ import base64
 import hashlib
 import requests
 from const.settings import IP_check_url
+from const.settings import IP_check_url_01
 from const.settings import headers
 from bs4            import BeautifulSoup as bs
 
@@ -37,6 +38,29 @@ def get_ip_addr(ip):
         except Exception as e:
             return 'unknown'
         return res
+    except Exception as e:
+        return 'unknown'
+
+def get_ip_addr_01(ip):
+    """
+        获取ip的地址信息
+        :param ip : IP地址
+        :return: 地址信息
+        """
+    try:
+        resp = requests.get(IP_check_url_01 + ip, headers=headers)
+        try:
+            res = resp.json()
+            data = res['data']
+            country = data['country'] if data['country']!='XX' else ''
+            city    = data['city'] if data['city']!='XX' else ''
+            region  = data['region'] if data['region']!='XX' else ''
+            isp     = data['isp'] if data['isp']!='XX' else ''
+            addr = country+region+city+isp
+        except Exception as e:
+            return 'unknown'
+        else:
+            return addr
     except Exception as e:
         return 'unknown'
 

@@ -11,6 +11,7 @@ import random
 proxy_validate_url 	= 'http://www.moguproxy.com/proxy/checkIp/ipList?ip_ports%5B%5D={}%3A{}'
 #ip地址查询接口:url+ip
 IP_check_url 		= 'https://ip.cn/index.php?ip='
+IP_check_url_01     = 'http://www.chacuo.net/?m=ip&act=f&t=1&ip='
 #采集器内置爬虫采集地址
 builtin_crawl_urls 	= {
     #count 表示爬取数量
