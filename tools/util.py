@@ -11,6 +11,7 @@ import hashlib
 import requests
 from const.settings import IP_check_url
 from const.settings import IP_check_url_01
+from const.settings import IP_check_url_02
 from const.settings import headers
 from bs4            import BeautifulSoup as bs
 
@@ -63,6 +64,26 @@ def get_ip_addr_01(ip):
             return addr
     except Exception as e:
         return 'unknown'
+
+def get_ip_addr_02(ip):
+    """
+        获取ip的地址信息
+        :param ip : IP地址
+        :return: 地址信息
+        """
+    try:
+        resp = requests.post(IP_check_url_02,data={'ip':ip}, headers=headers)
+        try:
+            res = resp.json()
+            data = res['text']
+            addr = data['ipip_location']
+        except Exception as e:
+            return 'unknown'
+        else:
+            return addr
+    except Exception as e:
+        return 'unknown'
+
 
 def get_cookies(url, headers=headers, params={},proxies={}):
     """

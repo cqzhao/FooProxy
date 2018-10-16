@@ -8,7 +8,7 @@
 import time
 import logging
 from tools.util         import time_to_date
-from tools.util         import get_ip_addr_01
+from tools.util         import get_ip_addr_02
 from config.DBsettings  import _TABLE
 from const.settings     import PRECISION
 from config.config      import MIN_SUCCESS_RATE
@@ -44,7 +44,7 @@ class Rator(object):
         if proxy in self.raw_filter:
             self.mark_update(data)
             return
-        address = get_ip_addr_01(ip)
+        address = get_ip_addr_02(ip)
         elapsed = round(int(data['resp_time'].replace('ms', '')) / 1000, 3)
         score = round(100 - 10 * (elapsed - 1), 2)
         stability = round(score/PRECISION,4)
@@ -115,7 +115,7 @@ class Rator(object):
             _combo_success = _one_data['combo_success']
             _success_rate = round(float(_one_data['success_rate'].replace('%',''))/100,4)
             score = round((score+_score*_count)/(_count+1)+SUCCESS_BASIC*(_combo_success+1)*_success_rate,2)
-            address = get_ip_addr_01(ip) if _address=='unknown' else _address
+            address = get_ip_addr_02(ip) if _address=='unknown' else _address
             success_rate = round(1-(_f_count/(_count+1)),3)
             stability = round(score*(_count+1)*success_rate/PRECISION,4)
             data['combo_fail'] = 0
