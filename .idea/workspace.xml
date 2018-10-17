@@ -2,16 +2,7 @@
 <project version="4">
   <component name="ChangeListManager">
     <list default="true" id="77e3dd22-c1bc-4fdb-bc60-78b4609789c3" name="Default Changelist" comment="">
-      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/components/crawlers.py" beforeDir="false" afterPath="$PROJECT_DIR$/components/crawlers.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/components/rator.py" beforeDir="false" afterPath="$PROJECT_DIR$/components/rator.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/components/scanner.py" beforeDir="false" afterPath="$PROJECT_DIR$/components/scanner.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/components/validator.py" beforeDir="false" afterPath="$PROJECT_DIR$/components/validator.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/components/workstation.py" beforeDir="false" afterPath="$PROJECT_DIR$/components/workstation.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/config/config.py" beforeDir="false" afterPath="$PROJECT_DIR$/config/config.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/const/settings.py" beforeDir="false" afterPath="$PROJECT_DIR$/const/settings.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/log/log.text" beforeDir="false" afterPath="$PROJECT_DIR$/log/log.text" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/tools/util.py" beforeDir="false" afterPath="$PROJECT_DIR$/tools/util.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/README.md" beforeDir="false" afterPath="$PROJECT_DIR$/README.md" afterDir="false" />
     </list>
     <option name="EXCLUDED_CONVERTED_TO_IGNORED" value="true" />
     <option name="SHOW_DIALOG" value="false" />
@@ -45,14 +36,14 @@
           <entry key="createTable" value="6" />
           <entry key="debug" value="4" />
           <entry key="error" value="57" />
-          <entry key="md" value="2" />
+          <entry key="md" value="3" />
           <entry key="py" value="176" />
           <entry key="text" value="42" />
         </counts>
       </usages-collector>
       <usages-collector id="statistics.file.types.open">
         <counts>
-          <entry key="Markdown" value="2" />
+          <entry key="Markdown" value="3" />
           <entry key="PLAIN_TEXT" value="113" />
           <entry key="Python" value="176" />
           <entry key="SQL" value="6" />
@@ -65,14 +56,14 @@
           <entry key="createTable" value="97" />
           <entry key="dummy" value="21" />
           <entry key="error" value="3" />
-          <entry key="md" value="2485" />
+          <entry key="md" value="2489" />
           <entry key="py" value="21586" />
           <entry key="text" value="2" />
         </counts>
       </usages-collector>
       <usages-collector id="statistics.file.types.edit">
         <counts>
-          <entry key="Markdown" value="2478" />
+          <entry key="Markdown" value="2482" />
           <entry key="PLAIN_TEXT" value="255" />
           <entry key="Python" value="23110" />
           <entry key="SQL" value="97" />
@@ -94,15 +85,27 @@
           </provider>
         </entry>
       </file>
-      <file pinned="false" current-in-tab="true">
+      <file pinned="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/components/scanner.py">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="166">
-              <caret line="79" selection-start-line="79" selection-end-line="79" />
+            <state relative-caret-position="216">
+              <caret line="99" column="5" selection-start-line="99" selection-start-column="5" selection-end-line="99" selection-end-column="5" />
               <folding>
                 <element signature="e#107#118#0" expanded="true" />
                 <marker date="1539794822693" expanded="true" signature="1586:1591" ph="..." />
               </folding>
+            </state>
+          </provider>
+        </entry>
+      </file>
+      <file pinned="false" current-in-tab="true">
+        <entry file="file://$PROJECT_DIR$/README.md">
+          <provider selected="true" editor-type-id="split-provider[text-editor;markdown-preview-editor]">
+            <state split_layout="SPLIT">
+              <first_editor relative-caret-position="-23">
+                <caret line="173" column="6" lean-forward="true" selection-start-line="173" selection-start-column="6" selection-end-line="173" selection-end-column="6" />
+              </first_editor>
+              <second_editor />
             </state>
           </provider>
         </entry>
@@ -183,7 +186,6 @@
         <option value="$PROJECT_DIR$/log/log.text" />
         <option value="$PROJECT_DIR$/config/DBsettings.py" />
         <option value="$PROJECT_DIR$/log/log.conf" />
-        <option value="$PROJECT_DIR$/README.md" />
         <option value="$PROJECT_DIR$/components/detector.py" />
         <option value="$PROJECT_DIR$/components/dbhelper.py" />
         <option value="$PROJECT_DIR$/APIserver/apiserver.py" />
@@ -195,6 +197,7 @@
         <option value="$PROJECT_DIR$/components/rator.py" />
         <option value="$PROJECT_DIR$/tools/util.py" />
         <option value="$PROJECT_DIR$/components/scanner.py" />
+        <option value="$PROJECT_DIR$/README.md" />
       </list>
     </option>
   </component>
@@ -433,7 +436,7 @@
       <window_info id="Favorites" order="2" side_tool="true" />
       <window_info anchor="bottom" id="Message" order="0" />
       <window_info anchor="bottom" id="Find" order="1" />
-      <window_info active="true" anchor="bottom" id="Run" order="2" sideWeight="0.4989339" visible="true" weight="0.521692" />
+      <window_info active="true" anchor="bottom" id="Run" order="2" sideWeight="0.4989339" visible="true" weight="0.30368763" />
       <window_info anchor="bottom" id="Debug" order="3" weight="0.48481563" />
       <window_info anchor="bottom" id="Cvs" order="4" weight="0.25" />
       <window_info anchor="bottom" id="Inspection" order="5" weight="0.4" />
@@ -517,16 +520,6 @@
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="200">
           <caret line="8" selection-start-line="8" selection-end-line="19" selection-end-column="16" />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/README.md">
-      <provider selected="true" editor-type-id="split-provider[text-editor;markdown-preview-editor]">
-        <state split_layout="SPLIT">
-          <first_editor relative-caret-position="50">
-            <caret line="136" column="22" lean-forward="true" selection-start-line="136" selection-start-column="22" selection-end-line="136" selection-end-column="22" />
-          </first_editor>
-          <second_editor />
         </state>
       </provider>
     </entry>
@@ -682,12 +675,22 @@
     </entry>
     <entry file="file://$PROJECT_DIR$/components/scanner.py">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="166">
-          <caret line="79" selection-start-line="79" selection-end-line="79" />
+        <state relative-caret-position="216">
+          <caret line="99" column="5" selection-start-line="99" selection-start-column="5" selection-end-line="99" selection-end-column="5" />
           <folding>
             <element signature="e#107#118#0" expanded="true" />
             <marker date="1539794822693" expanded="true" signature="1586:1591" ph="..." />
           </folding>
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/README.md">
+      <provider selected="true" editor-type-id="split-provider[text-editor;markdown-preview-editor]">
+        <state split_layout="SPLIT">
+          <first_editor relative-caret-position="-23">
+            <caret line="173" column="6" lean-forward="true" selection-start-line="173" selection-start-column="6" selection-end-line="173" selection-end-column="6" />
+          </first_editor>
+          <second_editor />
         </state>
       </provider>
     </entry>
