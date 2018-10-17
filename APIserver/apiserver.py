@@ -25,10 +25,10 @@ stable_db.connect()
 
 all_standby_proxy   = standby_db.all()
 all_stable_proxy    = stable_db.all()
-anony_standby       = [i for i in all_standby_proxy if i['anony_type']=='高匿']
-anony_stable        = [i for i in all_stable_proxy if i['anony_type']=='高匿']
-normal_standby      = [i for i in all_standby_proxy if i['anony_type']=='透明']
-normal_stable       = [i for i in all_stable_proxy if i['anony_type']=='透明']
+anony_standby       = [i for i in all_standby_proxy if i['anony_type']=='高匿' and i['combo_fail']==0]
+anony_stable        = [i for i in all_stable_proxy if i['anony_type']=='高匿' and i['combo_fail']==0 ]
+normal_standby      = [i for i in all_standby_proxy if i['anony_type']=='透明' and i['combo_fail']==0]
+normal_stable       = [i for i in all_stable_proxy if i['anony_type']=='透明' and i['combo_fail']==0]
 
 @app.route('/')
 def index():

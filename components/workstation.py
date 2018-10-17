@@ -11,12 +11,9 @@ from APIserver.apiserver    import app
 from components.collector   import Collector
 from components.validator   import Validator
 from components.detector    import Detector
-from components.rator       import Rator
-from components.dbhelper    import Database
 from components.scanner     import Scaner
 from multiprocessing        import Pool
 from multiprocessing        import Manager
-from config.DBsettings      import _DB_SETTINGS
 from config.config          import MODE
 from const.settings         import RUN_FUNC
 

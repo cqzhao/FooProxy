@@ -7,8 +7,13 @@
 """
 import random
 
+#代理ip的API接口,此处用FooProxy的API接口
+proxy_api = 'http://127.0.0.1:5000/proxy'
+
 #代理ip验证可用性验证接口
 proxy_validate_url 	= 'http://www.moguproxy.com/proxy/checkIp/ipList?ip_ports%5B%5D={}%3A{}'
+#多重查询接口
+mul_validate_url =  'http://www.moguproxy.com/proxy/checkIp/ipList?'
 #ip地址查询接口:url+ip
 IP_check_url 		= 'https://ip.cn/index.php?ip='
 IP_check_url_01     = 'http://www.chacuo.net/?m=ip&act=f&t=1&ip='
@@ -118,4 +123,16 @@ user_agents = [
 #伪造请求头部
 headers = {
 	'user-agent': random.choice(user_agents),
+}
+
+#验证代理请求头部
+v_headers = {
+	'user-agent': random.choice(user_agents),
+	'Accept': 'application/json, text/plain, */*',
+	'Accept-Encoding': 'gzip, deflate',
+	'Accept-Language': 'zh-CN,zh;q=0.9',
+	'Connection': 'keep-alive',
+	'Host': 'www.moguproxy.com',
+	'Referer': 'http://www.moguproxy.com/moitor/',
+	'X-Requested-With': 'XMLHttpRequest',
 }

@@ -39,8 +39,8 @@ STABLE_MIN_COUNT    = 100
 #运行模式,置 1 表示运行，置 0 表示 不运行
 #全置 0 表示只运行 API server
 MODE = {
-    'Collector' : 1,    #代理采集
-    'Validator' : 1,    #验证存储
+    'Collector' : 0,    #代理采集
+    'Validator' : 0,    #验证存储
     'Scanner'   : 1,    #扫描本地库
-    'Detector'  : 1,    #高分检测
+    'Detector'  : 0,    #高分检测
 }

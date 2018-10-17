@@ -12,6 +12,7 @@ import requests
 import logging
 from gevent                 import pool
 from gevent                 import monkey
+from tools.util             import get_proxy
 from config.DBsettings      import _DB_SETTINGS
 from config.DBsettings      import _TABLE
 from config.config          import CONCURRENCY
@@ -61,22 +62,29 @@ class Validator(object):
         session = requests.Session()
         session.mount('http://', HTTPAdapter(max_retries=VALIDATE_RETRY))
         session.mount('https://', HTTPAdapter(max_retries=VALIDATE_RETRY))
-        try:
-            # 可设置响应超时对API服务器请求代理，没写
-            response = session.get(proxy_validate_url.format(ip,port),
-                                    proxies = proxies,
-                                    headers=headers,
-                                    timeout=15)
-        except Exception as e:
-            logger.error('Error class : %s , msg : %s ' % (e.__class__, e))
-            return
-        else:
-            data = response.json()
-            res  = data['msg'][0]
-            if 'anony' in res and 'time' in res:
-                bullet = {'ip':ip,'port':port,'anony_type':res['anony'],
-                          'address':'','score':0,'valid_time':'',
-                          'resp_time':res['time'],'test_count':0,
-                          'fail_count':0,'createdTime':'','combo_success':1,'combo_fail':0,
-                          'success_rate':'','stability':0.00}
-                self.rator.mark_success(bullet)
+        trys = 0
+        while 1 :
+            try:
+                response = session.get(proxy_validate_url.format(ip,port),
+                                        proxies = proxies,
+                                        headers=headers,
+                                        timeout=15)
+            except Exception as e:
+                proxies = get_proxy()
+                trys+=1
+                if trys > 10:
+                    logger.error('Error class : %s , msg : %s ' % (e.__class__, e))
+                    return
+                else:
+                    continue
+            else:
+                data = response.json()
+                res  = data['msg'][0]
+                if 'anony' in res and 'time' in res:
+                    bullet = {'ip':ip,'port':port,'anony_type':res['anony'],
+                              'address':'','score':0,'valid_time':'',
+                              'resp_time':res['time'],'test_count':0,
+                              'fail_count':0,'createdTime':'','combo_success':1,'combo_fail':0,
+                              'success_rate':'','stability':0.00}
+                    self.rator.mark_success(bullet)
+                    return
