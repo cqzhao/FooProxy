@@ -13,6 +13,7 @@ proxy_validate_url 	= 'http://www.moguproxy.com/proxy/checkIp/ipList?ip_ports%5B
 IP_check_url 		= 'https://ip.cn/index.php?ip='
 IP_check_url_01     = 'http://www.chacuo.net/?m=ip&act=f&t=1&ip='
 IP_check_url_02		= 'https://tool.lu/ip/ajax.html'
+IP_check_url_03		= 'http://whois.pconline.com.cn/ip.jsp?ip='
 #采集器内置爬虫采集地址
 builtin_crawl_urls 	= {
     #count 表示爬取数量

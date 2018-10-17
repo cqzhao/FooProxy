@@ -69,14 +69,18 @@ class Database(object):
         else:
             raise TypeError('Expected a [{},{}..] or {} type data,%s type received.' % type(data))
 
-    def select(self,condition,tname=None):
+    def select(self,condition,tname=None,sort=None):
         table = self.table if self.table else tname
         if not isinstance(condition,dict):
             raise TypeError('condition is not a valid dict type param.')
         else:
             try:
                 conditions = self.gen_mapped_condition(condition)
-                data = list(self.handler[table].find(conditions))
+                if sort and isinstance(sort,dict):
+                    res = self.handler[table].find(condition).sort(list(sort.items()))
+                else:
+                    res = self.handler[table].find(conditions)
+                data = list(res)
                 return data if data else []
             except Exception as e:
                 logger.error('Error class : %s , msg : %s ' % (e.__class__, e))
