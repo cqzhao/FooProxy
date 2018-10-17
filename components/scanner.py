@@ -22,6 +22,7 @@ from const.settings         import v_headers
 from components.rator       import Rator
 from components.dbhelper    import Database
 from tools.util             import find_proxy
+from tools.util             import get_proxy
 
 logger = logging.getLogger('Scanner')
 
@@ -76,23 +77,29 @@ class Scaner(object):
                 return
 
     async def validate(self,url_str, proxies,semaphore):
-        # 可设置响应超时对API服务器请求代理，没写
+        _proxy = None
         async with semaphore:
             async with aiohttp.ClientSession() as session:
-                try:
-                    async with session.get(mul_validate_url+url_str,
-                                   headers=v_headers) as response:
-                        data = await response.text(encoding='utf-8')
-                        data = json.loads(data)
-                except Exception as e:
-                    logger.error('Error class : %s , msg : %s ' % (e.__class__, e))
-                    return
-                else:
-                    for res in data['msg']:
-                        proxy = find_proxy(res['ip'],res['port'],proxies)
-                        if 'anony' in res and 'time' in res:
-                            proxy['anony_type'] = res['anony']
-                            proxy['resp_time'] = res['time']
-                            self.rator.mark_update(proxy, collected=False)
-                        else:
-                            self.rator.mark_fail(proxy)
+                while 1:
+                    try:
+                        async with session.get(mul_validate_url+url_str,
+                                       headers=v_headers,proxy=_proxy) as response:
+                            data = await response.text(encoding='utf-8')
+                            data = json.loads(data)
+                    except Exception as e:
+                        _proxy = get_proxy(format=False)
+                        continue
+                    else:
+                        for res in data['msg']:
+                            proxy = find_proxy(res['ip'],res['port'],proxies)
+                            try:
+                                if 'anony' in res and 'time' in res:
+                                    proxy['anony_type'] = res['anony']
+                                    proxy['resp_time'] = res['time']
+                                    self.rator.mark_update(proxy, collected=False)
+                                else:
+                                    self.rator.mark_fail(proxy)
+                            except KeyError as e:
+                                logger.error('Error class : %s , msg : %s ' % (e.__class__, e))
+                                continue
+                        return

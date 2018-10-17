@@ -55,8 +55,7 @@ class Rator(object):
         data['score'] = score
         data['test_count'] = 1
         data['stability'] = stability
-        data['success_rate'] = str(round(1 - (data['fail_count'] / data['test_count']),
-                                         3) * 100) + '%'
+        data['success_rate'] = '100%'
         self.db.save(data)
         self.raw_filter.add(proxy)
 
@@ -126,6 +125,4 @@ class Rator(object):
             data['combo_success'] = _combo_success+1
             data['success_rate'] = str(success_rate*100)+'%'
             data['stability'] = stability
-            del data['fail_count']
-            del data['createdTime']
             self.db.update({'ip':ip,'port':port},data)

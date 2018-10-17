@@ -22,10 +22,6 @@ IP_check_url_03		= 'http://whois.pconline.com.cn/ip.jsp?ip='
 #采集器内置爬虫采集地址
 builtin_crawl_urls 	= {
     #count 表示爬取数量
-    'nyloner':{
-        'url':'https://www.nyloner.cn/proxy',
-        'count':1000,
-    },
     #其需要的追加参数在下面设置,详见_66ip_params
     '66ip':{
         'url':'http://www.66ip.cn/nmtq.php',

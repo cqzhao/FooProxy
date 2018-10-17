@@ -6,16 +6,14 @@
 """
 import re
 import time
-import json
-import base64
-import hashlib
+import random
 import requests
+from APIserver      import apiserver
 from const.settings import IP_check_url
 from const.settings import IP_check_url_01
 from const.settings import IP_check_url_02
 from const.settings import IP_check_url_03
 from const.settings import headers
-from const.settings import proxy_api
 from bs4            import BeautifulSoup as bs
 
 def time_to_date(timestamp):
@@ -115,39 +113,6 @@ def get_cookies(url, headers=headers, params={},proxies={}):
     cookies = requests.get(url, headers=headers, params=params,proxies=proxies).cookies
     return cookies
 
-def get_nyloner_params(page,num):
-    """
-    获取代理ip提供网站:https://www.nyloner.cn的请求伪造参数
-    :param page: 请求页面所在页数 (一般设为1，后续num设定爬取多少条ip便可)
-    :param num: 这一页要爬取的代理ip条数
-    :return: 有效的请求伪造参数
-    """
-    timestamp = int(time.time())
-    token = hashlib.md5(str(page).encode(encoding='UTF-8')+
-                        str(num).encode(encoding='UTF-8')+
-                        str(timestamp).encode(encoding='UTF-8')).hexdigest()
-    return {
-        'page':page,
-        'num':num,
-        'token':token,
-        't'	: timestamp,
-    }
-
-def base64_decode(data,key='\x6e\x79\x6c\x6f\x6e\x65\x72'):
-    """
-    IP代理网站：https://www.nyloner.cn/proxy的代理抓取json数据解密函数
-    :param data: 抓取的json数据的list的加密内容
-    :param key : 加密的key 默认为'\x6e\x79\x6c\x6f\x6e\x65\x72'即是'nyloner'
-    :return: 返回解密list内容,json格式
-    """
-    data = base64.b64decode(data)
-    code = ''
-    for x in range(len(data)):
-        j = x % len(key)
-        code += chr((data[x]^ord(key[j]))%256)
-    decoded_data = str(base64.b64decode(code)).lstrip('b').strip('\'')
-    return json.loads(decoded_data)
-
 def  is_proxy_valid(proxy):
     """
     :usage:
@@ -158,7 +123,6 @@ def  is_proxy_valid(proxy):
     @result	: 符合要求则返回 代理ip，否则为 []
     """
     return re.findall(r'\b(?:[0-9]{1,3}\.){3}[0-9]{1,3}\b\:\d+',proxy)
-
 
 def format_proxies(proxy_list):
     """
@@ -187,25 +151,31 @@ def format_proxies(proxy_list):
         for i in proxy_list
     ]
 
-
-def get_proxy(kind='anony'):
-    if kind not in ['anony', 'normal']:
-        return None
-    url = proxy_api.format(kind=kind)
-    try:
-        res = requests.get(url)
-    except Exception as e:
-        return {}
-    else:
-        proxy = res.json()
-        if proxy:
-            formatted_proxy = format_proxies(':'.join([proxy['ip'], proxy['port']]))
-        else:
+def get_proxy(kind='anony',format=True):
+    kinds = {'anony':'高匿','normal':'透明'}[kind]
+    res = apiserver.stable_db.select({'anony_type': kinds, 'combo_fail': 0}, sort={'combo_success': -1})
+    if not res:
+        res = apiserver.standby_db.select({'anony_type': kinds, 'combo_fail': 0}, sort={'combo_success': -1})
+    if not res:
+        if format:
             return {}
+        else:
+            return None
+    lens = len(res)
+    proxy =  res[random.randint(0,lens-1)]
+    if format:
+        formatted_proxy = format_proxies(':'.join([proxy['ip'], proxy['port']]))
         return formatted_proxy
+    else:
+        _proxy = 'http://'+':'.join([proxy['ip'], proxy['port']])
+        return _proxy
 
 def find_proxy(ip,port,proxies):
     for i in proxies:
-        if i['ip']==ip and i['port']==port:
-            return i
+        if isinstance(i,dict):
+            if i['ip']==ip and i['port']==port:
+                return i
+        elif isinstance(i,str):
+            if ip+':'+port == i:
+                return i
     return {}

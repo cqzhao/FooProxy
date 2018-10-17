@@ -42,5 +42,5 @@ MODE = {
     'Collector' : 0,    #代理采集
     'Validator' : 0,    #验证存储
     'Scanner'   : 1,    #扫描本地库
-    'Detector'  : 0,    #高分检测
+    'Detector'  : 1,    #高分检测
 }
