@@ -17,7 +17,14 @@ from const.settings     import FAIL_BASIC,SUCCESS_BASIC
 logger = logging.getLogger('Rator')
 
 class Rator(object):
+    """
+    打分器，对代理IP的打分存储，内置于验证器和扫描器中
+    """
     def __init__(self,db):
+        """
+        初始化
+        :param db: 打分器对应的数据库，即要将代理数据进行存储、更新、删除操作的数据库
+        """
         self.raw_filter     = set()
         self.local_data     = []
         self.db             = db
@@ -26,11 +33,14 @@ class Rator(object):
         self.db.table = _TABLE['standby']
         self.db.connect()
 
-
     def end(self):
         self.db.close()
 
     def pull_table(self,tname):
+        """
+        将数据库中某个数据集的所有IP数据存入过滤器，防止重复存储打分
+        :param tname:数据集名称
+        """
         if not tname:
             return
         table_data = self.db.all(tname)
@@ -38,6 +48,10 @@ class Rator(object):
             self.raw_filter.add(':'.join([i['ip'],i['port']]))
 
     def mark_success(self,data):
+        """
+        代理IP数据经过验证器验证成功，进行第一次的打分存储
+        :param data: 单个要存储的代理IP数据，dict类型
+        """
         ip = data['ip']
         port = data['port']
         proxy = ':'.join([ip,port])
@@ -60,6 +74,11 @@ class Rator(object):
         self.raw_filter.add(proxy)
 
     def mark_fail(self,data):
+        """
+        对第二次或以上的单个代理IP数据进行验证失败的打分更新操作，
+        将combo_fail+1,combo_success置0,以及对其扣分，满足删除条件则直接删除
+        :param data:单个IP代理数据 dict 类型
+        """
         ip = data['ip']
         port = data['port']
         proxy = ':'.join([ip,port])
@@ -90,6 +109,12 @@ class Rator(object):
                 self.db.update({'ip':ip,'port':port},update_data)
 
     def mark_update(self,data,collected=True):
+        """
+        对单个代理IP数据进行验证成功的打分更新操作，
+        将combo_success+1,combo_fail置0,以及对其加分
+        :param data: 单个代理IP数据 dict类型
+        :param collected: 是否是第一次进行验证的代理
+        """
         ip = data['ip']
         port = data['port']
         proxy = ':'.join([ip,port])
@@ -125,4 +150,5 @@ class Rator(object):
             data['combo_success'] = _combo_success+1
             data['success_rate'] = str(success_rate*100)+'%'
             data['stability'] = stability
+            if data.get('_id',False):del data['_id']
             self.db.update({'ip':ip,'port':port},data)

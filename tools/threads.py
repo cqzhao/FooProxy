@@ -8,6 +8,9 @@
 import threading
 
 class CrawlThread(threading.Thread):
+    """
+    采集爬虫的线程封装，只是多加了一个结果提取函数get_result
+    """
     def __init__(self, func, args=() ):
         super(CrawlThread, self).__init__()
         self.func = func

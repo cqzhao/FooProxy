@@ -16,6 +16,10 @@ logger = logging.getLogger('Collector')
 
 
 def ip66():
+    """
+    内置的IP代理采集爬虫,必须添加到下方的builtin_crawlers中才会生效
+    :return: 采集到的代理IP数据,list类型 ['<ip>:<port>',..]
+    """
     s       = requests.Session()
     url     = _urls['66ip']['url']
     try:

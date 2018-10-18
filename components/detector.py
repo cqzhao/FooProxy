@@ -23,6 +23,14 @@ monkey.patch_socket()
 logger = logging.getLogger('Detector')
 
 class Detector(object):
+    """
+    本地检测器，主要职责有三:
+    1. 负责检测本地standby数据库中存入的有效代理IP数据是否有符合高分稳定条件的，
+       有则存入高分稳定数据库stable数据库
+    2. 检测standby数据库的同时，如果符合高分条件的代理已经在stable中，则将standby中
+       该代理的最新数据同步更新到stable数据库中
+    3. 负责检测stable数据库中的高分稳定代理是否有不符合高分条件的，有则从stable中删除
+    """
     def __init__(self):
         self.standbyDB  = Database(_DB_SETTINGS)
         self.stableDB   = Database(_DB_SETTINGS)
@@ -40,6 +48,9 @@ class Detector(object):
         self.stableDB.close()
 
     def run(self):
+        """
+        运行本地检测器，利用asyncio提供的异步读写
+        """
         logger.info('Running Detector.')
         self.begin()
         loop = asyncio.get_event_loop()
@@ -56,6 +67,10 @@ class Detector(object):
                 return
 
     def detect_standby(self,loop):
+        """
+        检测standby数据库
+        :param loop: 异步事件循环
+        """
         if self.standby_data:
             pen = len(self.standby_data)
             logger.info('Imported the "standby" database\' data,length: %d ' % pen)
@@ -69,6 +84,10 @@ class Detector(object):
             self.standby_data = self.standbyDB.all()
 
     def detect_stable(self,loop):
+        """
+        检测stable数据库
+        :param loop: 异步事件循环
+        """
         if self.stable_data:
             pen = len(self.stable_data)
             logger.info('Imported the "stable" database\' data,length: %d ' % pen)
@@ -82,6 +101,17 @@ class Detector(object):
             self.stable_data = self.stableDB.all()
 
     async def _detect_standby(self,data):
+        """
+        异步协程，对单个standby数据库中的数据文档进行检测
+        其中的
+            data['test_count']<STABLE_MIN_COUNT
+            表示 测试总数小于config中配置的数值
+            round(float(data['success_rate'].replace('%',''))/100,4)< STABLE_MIN_RATE
+            表示 成功率小于config中配置的数值
+            data['combo_fail'] >= DELETE_COMBO
+            表示 连续失败数 超过或等于config中配置的数值
+        :param data: standby中的单个数据文档 ，dict类型
+        """
         del data['_id']
         ip = data['ip']
         port = data['port']
@@ -98,7 +128,15 @@ class Detector(object):
             logger.info('Find a stable proxy: %s , put it into the stable database.' % proxy)
 
     async def _detect_stable(self,data):
-        del data['_id']
+        """
+       异步协程，对单个stable数据库中的数据文档进行检测
+       其中的
+           round(float(_one_data['success_rate'].replace('%',''))/100,4)< STABLE_MIN_RATE
+           表示 成功率小于config中配置的数值
+           _one_data['combo_fail'] >= DELETE_COMBO
+           表示 连续失败数 超过或等于config中配置的数值
+       :param data: stable中的单个数据文档 ，dict类型
+       """
         ip = data['ip']
         port = data['port']
         proxy = ':'.join([ip,port])

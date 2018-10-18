@@ -20,6 +20,9 @@ from const.settings         import RUN_FUNC
 logger = logging.getLogger()
 
 class Workstation(object):
+    """
+    整个项目的启动工作面板
+    """
     def __init__(self):
         self.collector = Collector()
         self.validator = Validator()
@@ -40,6 +43,12 @@ class Workstation(object):
         self.scanner.run()
 
     def work(self):
+        """
+        项目启动，根据config中的MODE配置执行对应的部件
+        这样可以隔离部件功能，耦合性较低。异步多进程执行需要
+        共享变量，使用了multiprocessing的Manager来生成
+        共享List.
+        """
         pool = Pool(5)
         func = []
         for i in MODE:

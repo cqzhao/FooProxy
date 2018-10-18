@@ -45,10 +45,10 @@ def get_ip_addr(ip):
 
 def get_ip_addr_01(ip):
     """
-        获取ip的地址信息
-        :param ip : IP地址
-        :return: 地址信息
-        """
+    获取ip的地址信息
+    :param ip : IP地址
+    :return: 地址信息
+    """
     try:
         resp = requests.get(IP_check_url_01 + ip, headers=headers)
         try:
@@ -68,10 +68,10 @@ def get_ip_addr_01(ip):
 
 def get_ip_addr_02(ip):
     """
-        获取ip的地址信息
-        :param ip : IP地址
-        :return: 地址信息
-        """
+    获取ip的地址信息
+    :param ip : IP地址
+    :return: 地址信息
+    """
     try:
         resp = requests.post(IP_check_url_02,data={'ip':ip}, headers=headers)
         try:
@@ -108,6 +108,7 @@ def get_cookies(url, headers=headers, params={},proxies={}):
     :param url: 要获取cookie的网址
     :param headers: 给定的请求头部
     :param params: 请求参数
+    :param proxies:请求代理
     :return: 需要的cookies
     """
     cookies = requests.get(url, headers=headers, params=params,proxies=proxies).cookies
@@ -152,6 +153,12 @@ def format_proxies(proxy_list):
     ]
 
 def get_proxy(kind='anony',format=True):
+    """
+    获取本地代理池数据库中的代理数据
+    :param kind:代理类型
+    :param format:是否需要格式化代理，符合requests模块需求
+    :return:
+    """
     kinds = {'anony':'高匿','normal':'透明'}[kind]
     res = apiserver.stable_db.select({'anony_type': kinds, 'combo_fail': 0}, sort={'combo_success': -1})
     if not res:
@@ -174,8 +181,5 @@ def find_proxy(ip,port,proxies):
     for i in proxies:
         if isinstance(i,dict):
             if i['ip']==ip and i['port']==port:
-                return i
-        elif isinstance(i,str):
-            if ip+':'+port == i:
                 return i
     return {}
