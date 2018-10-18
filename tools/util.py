@@ -157,7 +157,7 @@ def get_proxy(kind='anony',format=True):
     获取本地代理池数据库中的代理数据
     :param kind:代理类型
     :param format:是否需要格式化代理，符合requests模块需求
-    :return:
+    :return:返回一个代理
     """
     kinds = {'anony':'高匿','normal':'透明'}[kind]
     res = apiserver.stable_db.select({'anony_type': kinds, 'combo_fail': 0}, sort={'combo_success': -1})
@@ -178,6 +178,13 @@ def get_proxy(kind='anony',format=True):
         return _proxy
 
 def find_proxy(ip,port,proxies):
+    """
+    根据ip，端口查找符合条件的代理
+    :param ip: 查询ip
+    :param port: 查询端口
+    :param proxies: 查找的代理IP列表，类型[{'ip':<ip>,'port':<port>,...},...]
+    :return:符合条件的代理数据 dict类型 {'ip':<ip>,'port':<port>,...}
+    """
     for i in proxies:
         if isinstance(i,dict):
             if i['ip']==ip and i['port']==port:
