@@ -8,7 +8,6 @@
 import time
 import asyncio
 import logging
-from gevent                 import monkey
 from components.dbhelper    import Database
 from config.DBsettings      import _DB_SETTINGS
 from config.DBsettings      import _TABLE
@@ -19,7 +18,6 @@ from config.config          import STABLE_MIN_RATE
 from config.config          import STABLE_MIN_COUNT
 from config.config          import DELETE_COMBO
 
-monkey.patch_socket()
 logger = logging.getLogger('Detector')
 
 class Detector(object):

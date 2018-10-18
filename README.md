@@ -13,7 +13,6 @@
 > **需安装的库**
 * pymongo
 * flask
-* gevent
 * requests
 * bs4
 * lxml
@@ -77,7 +76,7 @@ my_crawlers = []
 
 采集器进程和验证器进程共享一个变量:**proxyList**，是一个MultiProcessing.Manger.List对象。可以在多进程中
 保持共享数据的同步(理论上)，采集器定期采集的代理数据可以通过proxyList实时的传递给验证器进行有效性验证，因为采集器一次传递的数据比较多，
-所以验证器使用异步验证，能大大提高效率，具体使用gevent。(使用自带的asyncio也是可以实现的)
+所以验证器使用异步验证，能大大提高效率，具体使用自带的asyncio实现的.
 > 验证器实现基本上也是调用了一个验证api来判断代理的有效性，可以自己更换api实现，可在validator.py中详细了解。在config中可以配置异步的并发量等来控制验证器。
 
 3.**打分存储(Rator)**
