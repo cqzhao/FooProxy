@@ -14,7 +14,6 @@ from bs4                import BeautifulSoup        as bs
 
 logger = logging.getLogger('Collector')
 
-
 def ip66():
     """
     内置的IP代理采集爬虫,必须添加到下方的builtin_crawlers中才会生效
@@ -33,6 +32,5 @@ def ip66():
         data = [i[0] for i in data if i]
         data = list(set(data))
         return data
-
 
 builtin_crawlers = [ip66,]
