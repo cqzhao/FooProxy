@@ -7,7 +7,7 @@
 """
 
 #采集器采集数据时间间隔,单位：秒
-COLLECT_TIME_GAP    = 3600*1
+COLLECT_TIME_GAP    = 3600*0.5
 #验证器的最大并发量
 CONCURRENCY         = 300
 #验证器一次取出多少条 抓取的 代理进行验证

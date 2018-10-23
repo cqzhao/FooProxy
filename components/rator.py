@@ -109,8 +109,7 @@ class Rator(object):
                 try:
                     self.raw_filter.remove(proxy)
                 except Exception as e:
-                    logger.error('Error class : %s , msg : %s ' % (e.__class__, e))
-                    logger.error('Proxy %s  had been deleted from the filter.'%proxy)
+                    pass
             else:
                 self.db.update({'ip':ip,'port':port},update_data)
 
