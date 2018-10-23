@@ -106,6 +106,11 @@ class Rator(object):
                     _score < 0:
                 logger.warning('Deleting unstable proxy: %s '%proxy)
                 self.db.delete({'ip':ip,'port':port})
+                try:
+                    self.raw_filter.remove(proxy)
+                except Exception as e:
+                    logger.error('Error class : %s , msg : %s ' % (e.__class__, e))
+                    logger.error('Proxy %s  had been deleted from the filter.'%proxy)
             else:
                 self.db.update({'ip':ip,'port':port},update_data)
 
