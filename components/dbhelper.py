@@ -35,7 +35,10 @@ class Database(object):
         """
         连接MongoDB
         """
-        self.conn = pymongo.MongoClient(self.host, self.port,username=self.user,password=self.passwd)
+        if self.user and self.passwd:
+            self.conn = pymongo.MongoClient(self.host, self.port,username=self.user,password=self.passwd)
+        else:
+            self.conn = pymongo.MongoClient(self.host, self.port)
         self.handler = self.conn[self.db]
 
     def close(self):
