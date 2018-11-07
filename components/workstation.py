@@ -12,6 +12,7 @@ from components.collector   import Collector
 from components.validator   import Validator
 from components.detector    import Detector
 from components.scanner     import Scaner
+from components.tentacle    import Tentacle
 from multiprocessing        import Pool
 from multiprocessing        import Manager
 from config.config          import MODE
@@ -28,6 +29,7 @@ class Workstation(object):
         self.validator = Validator()
         self.detector  = Detector()
         self.scanner   = Scaner()
+        self.tentacle  = Tentacle()
         self.proxyList = Manager().list()
 
     def run_validator(self,proxyList):
@@ -41,6 +43,9 @@ class Workstation(object):
 
     def run_scanner(self,*params):
         self.scanner.run()
+
+    def run_tentacle(self,*params):
+        self.tentacle.run()
 
     def work(self):
         """

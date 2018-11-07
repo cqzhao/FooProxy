@@ -7,7 +7,7 @@
 """
 
 #采集器采集数据时间间隔,单位：秒
-COLLECT_TIME_GAP    = 3600*0.5
+COLLECT_TIME_GAP    = 3600*1
 #验证器的最大并发量
 CONCURRENCY         = 300
 #验证器一次取出多少条 抓取的 代理进行验证
@@ -36,6 +36,25 @@ MIN_SUCCESS_RATE    = 0.2
 #以及测试总数的最低要求
 STABLE_MIN_RATE     = 0.8500
 STABLE_MIN_COUNT    = 100
+#目标网站IP代理库验证扫描的最大数，即最多验证多少个目标网站(包含数据库中已存在的),超出部分不会验证
+MAX_T_LEN = 20
+#验证目标库一次最多验证的条数
+MAX_V_COUNT = 300
+#是否要扫描验证以前的目标网站IP代理库
+AGO = False
+#目标库验证请求的超时时间 单位：秒
+TIMEOUT = 30
+#目标库验证失败重试次数,-1 表示无限次失败重试,0 表示不进行失败重试
+RETRIES = 4
+#使用代理IP的爬虫目标网站列表,最多 MAX_T_LEN 个
+targets = [
+    'https://segmentfault.com/',
+    'https://www.csdn.net/',
+    'https://www.bilibili.com/',
+    'http://www.acfun.cn/'
+]
+#连续超过多少天没有进行验证的目标网站IP代理库则自动删除,单位:天
+TARGET_EXPIRE = 7
 #运行模式,置 1 表示运行，置 0 表示 不运行
 #全置 0 表示只运行 API server
 MODE = {
@@ -43,4 +62,5 @@ MODE = {
     'Validator' : 1,    #验证存储
     'Scanner'   : 1,    #扫描本地库
     'Detector'  : 1,    #高分检测
+    'Tentacle'  : 1,    #目标库验证扫描
 }

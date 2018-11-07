@@ -4,10 +4,14 @@
     @email   : yooleak@outlook.com
     @date    : 2018-10-04
 """
+import os
 import re
 import time
 import random
 import requests
+import asyncio
+import datetime
+import tldextract
 from APIserver      import apiserver
 from const.settings import IP_check_url
 from const.settings import IP_check_url_01
@@ -190,3 +194,33 @@ def find_proxy(ip,port,proxies):
             if i['ip']==ip and i['port']==port:
                 return i
     return {}
+
+def gen_target_db_name(target_url):
+    """
+    根据url网址生成对应的唯一标识数据库名称
+    :param target_url: 目标网址
+    :return:数据库名称
+    """
+    ext = tldextract.extract(target_url)
+    domain = ext.domain.lower()
+    suffix = ext.suffix.lower()
+    name = '_'.join([domain, suffix])
+    return name
+
+def internet_access():
+    """
+    查看当前系统是否联网
+    :return:布尔值，是否联网
+    """
+    p = os.popen('ping www.baidu.com')
+    a = p.read()
+    ra = re.findall(r'(\(0% 丢失\))',a)
+    return bool(ra)
+
+def get_target_proxy(target,kind='anony')-> dict:
+    """
+    从数据库中抽取一个目标网站的有效代理IP
+    :param target:目标网站的url
+    :return:代理IP数据
+    """
+    kinds = {'anony': '高匿', 'normal': '透明'}[kind]

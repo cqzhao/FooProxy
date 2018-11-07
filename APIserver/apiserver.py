@@ -17,11 +17,13 @@ logger      = logging.getLogger('APIserver')
 app         = Flask(__name__)
 stable_db   = Database(_DB_SETTINGS)
 standby_db  = Database(_DB_SETTINGS)
+common_db   = Database(_DB_SETTINGS)
 
 standby_db.table    = _TABLE['standby']
 stable_db.table     = _TABLE['stable']
 standby_db.connect()
 stable_db.connect()
+common_db.connect()
 
 all_standby_proxy   = standby_db.all()
 all_stable_proxy    = stable_db.all()
@@ -94,6 +96,22 @@ def get_proxy():
                     proxy = {}
     if proxy.get('_id',False):del proxy['_id']
     return json.dumps(proxy)
+
+@app.route('/proxy/target/<string:domain>/<string:suffix>/')
+@app.route('/proxy/target/<string:domain>/<string:suffix>')
+def get_target_proxy(domain,suffix):
+    #定义查询返回条件
+    query = {'score':{'>=':60},'test_count':{'>=':10}}
+    #按照分数降序排列
+    sort_by = {'score':-1}
+    db_name = '_'.join([domain.lower().strip(),suffix.lower().strip()])
+    if db_name in common_db.handler.list_collection_names():
+        proxies = common_db.select(query,tname=db_name,sort=sort_by)
+        for i in proxies:
+            del i['_id']
+        return json.dumps(proxies)
+    else:
+        return 'Wrong domain or suffix you requested.'
 
 def get_a_stable_anonymous():
     global anony_stable

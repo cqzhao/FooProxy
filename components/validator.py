@@ -5,10 +5,10 @@
     @email   : yooleak@outlook.com
     @date    : 2018-10-04
 """
-
 import time
 import math
 import json
+import copy
 import asyncio
 import aiohttp
 import logging
@@ -21,6 +21,7 @@ from const.settings         import mul_validate_url
 from const.settings         import v_headers
 from components.rator       import Rator
 from components.dbhelper    import Database
+from components.tentacle    import Tentacle
 from tools.util             import get_proxy
 
 logger = logging.getLogger('Validator')
@@ -34,6 +35,7 @@ class Validator(object):
         self.db         = Database(_DB_SETTINGS)
         self.db.table   =  _TABLE['standby']
         self.rator      = Rator(self.db)
+        self.Tentacle   = Tentacle()
 
     def check_allot(self,proxies):
         """
@@ -88,6 +90,10 @@ class Validator(object):
         """
         logger.info('Running Validator.')
         self.rator.begin()
+        semaphore = asyncio.Semaphore(CONCURRENCY)
+        loop = asyncio.get_event_loop()
+        conn = aiohttp.TCPConnector(limit=CONCURRENCY)
+        session = aiohttp.ClientSession(loop=loop, connector=conn)
         while 1:
             try:
                 if proxyList:
@@ -98,48 +104,49 @@ class Validator(object):
                     stanby_proxies =[proxyList.pop() for x in range(pop_len)]
                     prams_dict = self.check_allot(stanby_proxies)
                     logger.info('Start to verify the collected proxy data,amount: %d '%pop_len)
-                    semaphore = asyncio.Semaphore(CONCURRENCY)
-                    loop = asyncio.get_event_loop()
-                    tasks = [asyncio.ensure_future(self.validate_proxy(i,semaphore)) for i in prams_dict]
+                    tasks = [asyncio.ensure_future(self.validate_proxy(i,semaphore,session)) for i in prams_dict]
                     loop.run_until_complete(asyncio.gather(*tasks))
                     logger.info('Validation finished.Left collected proxies:%d'%len(proxyList))
                     time.sleep(VALIDATE_F)
             except Exception as e:
-                logger.error('Error class : %s , msg : %s '%(e.__class__,e))
+                logger.error('%s,msg: %s '%(e.__class__,e))
                 self.rator.end()
                 logger.info('Validator shuts down.')
                 return
 
-    async def validate_proxy(self,url_str,sem):
+    async def validate_proxy(self,url_str,sem,session):
         """
-        验证器验证函数，可以根据自己的验证逻辑重写
+         验证器验证函数，可以根据自己的验证逻辑重写
         :param url_str:查询参数字符串
+        :param sem:协程的最大并发信号量，控制协程连接数
+        :param session:异步请求session
         """
         _proxies = None
         async with sem:
-            async with aiohttp.ClientSession() as session:
-                while 1:
-                    try:
-                        async with session.get(mul_validate_url+url_str,
-                                                proxy = _proxies,
-                                                headers=v_headers,
-                                                ) as response:
-                            data = await response.text(encoding='utf-8')
-                            data = json.loads(data)
-                    except Exception as e:
-                            _proxies = get_proxy(format=False)
-                            if not _proxies:
-                                logger.error('No available proxy to retry the request for validation.')
-                                return
-                            continue
-                    else:
-                        for res in data['msg']:
-                            if 'anony' in res and 'time' in res:
-                                ip, port = res['ip'],res['port']
-                                bullet = {'ip':ip,'port':port,'anony_type':res['anony'],
-                                          'address':'','score':0,'valid_time':'',
-                                          'resp_time':res['time'],'test_count':0,
-                                          'fail_count':0,'createdTime':'','combo_success':1,'combo_fail':0,
-                                          'success_rate':'','stability':0.00}
-                                self.rator.mark_success(bullet)
-                        return
+            while 1:
+                try:
+                    async with session.get(mul_validate_url+url_str,
+                                            proxy = _proxies,
+                                            headers=v_headers,
+                                            ) as response:
+                        data = await response.text(encoding='utf-8')
+                        data = json.loads(data)
+                except Exception as e:
+                        _proxies = get_proxy(format=False)
+                        if not _proxies:
+                            logger.error('No available proxy to retry the request for validation.')
+                            return
+                        continue
+                else:
+                    for res in data['msg']:
+                        if 'anony' in res and 'time' in res:
+                            ip, port = res['ip'],res['port']
+                            bullet = {'ip':ip,'port':port,'anony_type':res['anony'],
+                                      'address':'','score':0,'valid_time':'',
+                                      'resp_time':res['time'],'test_count':0,
+                                      'fail_count':0,'createdTime':'','combo_success':1,'combo_fail':0,
+                                      'success_rate':'0.00%','stability':0.00}
+                            data = copy.deepcopy(bullet)
+                            self.rator.mark_success(bullet)
+                            await self.Tentacle.specified_validate(self.db,data,session,sem)
+                    return

@@ -25,7 +25,7 @@ builtin_crawl_urls 	= {
     #其需要的追加参数在下面设置,详见_66ip_params
     '66ip':{
         'url':'http://www.66ip.cn/nmtq.php',
-        'count':1000,
+        'count':2000,
     },
     #西刺代理(不建议)500个nn高匿可用的大概最多有10个吧..后面加 nn代表高匿，nt代表透明,wn代表https，wt代表http
     # 'xici':{
@@ -78,7 +78,10 @@ RUN_FUNC = {
     'Validator' : 'run_validator',
     'Scanner'   : 'run_scanner',
     'Detector'  : 'run_detector',
+	'Tentacle'	: 'run_tentacle'
 }
+#存放目标网站IP代理库列表的库名
+TARGETS_DB = 'targets'
 #伪造请求头部浏览器
 user_agents = [
 	"Mozilla/4.0 (compatible; MSIE 6.0; Windows NT 5.1; SV1; AcooBrowser; .NET CLR 1.1.4322; .NET CLR 2.0.50727)",
@@ -120,7 +123,6 @@ user_agents = [
 headers = {
 	'user-agent': random.choice(user_agents),
 }
-
 #验证代理请求头部
 v_headers = {
 	'user-agent': random.choice(user_agents),

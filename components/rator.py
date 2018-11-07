@@ -54,8 +54,9 @@ class Rator(object):
         """
         ip = data['ip']
         port = data['port']
-        proxy = ':'.join([ip,port])
-        if proxy in self.raw_filter:
+        # proxy = ':'.join([ip,port])
+        _data = self.db.select({'ip':ip,'port':port})
+        if _data:
             self.mark_update(data)
             return
         address = get_ip_addr_03(ip)
@@ -71,7 +72,6 @@ class Rator(object):
         data['stability'] = stability
         data['success_rate'] = '100%'
         self.db.save(data)
-        self.raw_filter.add(proxy)
 
     def mark_fail(self,data):
         """
@@ -79,39 +79,32 @@ class Rator(object):
         将combo_fail+1,combo_success置0,以及对其扣分，满足删除条件则直接删除
         :param data:单个IP代理数据 dict 类型
         """
-        ip = data['ip']
-        port = data['port']
-        proxy = ':'.join([ip,port])
-        update_data = {}
-        _one_data = data
-        if _one_data:
-            _score = _one_data['score']
-            _count = _one_data['test_count']
-            _f_count = _one_data['fail_count']
-            _success_rate = _one_data['success_rate']
-            _combo_fail = _one_data['combo_fail']
+        if data:
+            ip = data['ip']
+            port = data['port']
+            proxy = ':'.join([ip, port])
+            _score = data['score']
+            _count = data['test_count']
+            _f_count = data['fail_count']
+            _success_rate = data['success_rate']
+            _combo_fail = data['combo_fail']
             valid_time = time_to_date(int(time.time()))
-            update_data['score'] = round(_score-FAIL_BASIC*((_f_count+1)/(_count+1))*(_combo_fail+1),2)
-            update_data['combo_fail']    = _combo_fail+1
-            update_data['combo_success'] = 0
-            update_data['test_count']    = _count+1
-            update_data['fail_count']    = _f_count+1
-            update_data['valid_time']    = valid_time
-            update_data['createdTime']   = _one_data.get('createdTime',False)
-            success_rate = round(1-(update_data['fail_count']/update_data['test_count']),3)
-            update_data['success_rate'] = str(success_rate*100) + '%'
-            update_data['stability'] = round(update_data['score']*update_data['test_count']*
+            data['score'] = round(_score-FAIL_BASIC*((_f_count+1)/(_count+1))*(_combo_fail+1),2)
+            data['combo_fail']    = _combo_fail+1
+            data['combo_success'] = 0
+            data['test_count']    = _count+1
+            data['fail_count']    = _f_count+1
+            data['valid_time']    = valid_time
+            success_rate = round(1-((_f_count+1)/( _count+1)),3)
+            data['success_rate'] = str(success_rate*100) + '%'
+            data['stability'] = round(data['score']*data['test_count']*
                                              success_rate /PRECISION,4)
             if (_count >= 100 and _success_rate <= str(MIN_SUCCESS_RATE*100)+'%') or \
-                    _score < 0:
+                    int(_score) < 0:
                 logger.warning('Deleting unstable proxy: %s '%proxy)
                 self.db.delete({'ip':ip,'port':port})
-                try:
-                    self.raw_filter.remove(proxy)
-                except Exception as e:
-                    pass
             else:
-                self.db.update({'ip':ip,'port':port},update_data)
+                self.db.update({'ip':ip,'port':port},data)
 
     def mark_update(self,data,collected=True):
         """
@@ -122,7 +115,7 @@ class Rator(object):
         """
         ip = data['ip']
         port = data['port']
-        proxy = ':'.join([ip,port])
+        proxy = ':'.join([ip, port])
         valid_time = time_to_date(int(time.time()))
         data['valid_time'] = valid_time
         elapsed = round(int(data['resp_time'].replace('ms', '')) / 1000, 3)
@@ -131,23 +124,28 @@ class Rator(object):
             try:
                 _one_data = self.db.select({'ip':ip,'port':port})[0]
             except Exception as e:
-                logger.error('Error class : %s , msg : %s ' % (e.__class__, e))
-                logger.error('Proxy %s  does not in the standby database,skipping...'%proxy)
                 return
         else:
             _one_data = data
         if _one_data:
             _score = _one_data['score']
+            if int(_score) < 0:
+                logger.warning('Deleting unstable proxy: %s ' % proxy)
+                self.db.delete({'ip': ip, 'port': port})
+                return
             _count = _one_data['test_count']
             _f_count = _one_data['fail_count']
             _address = _one_data['address']
             _combo_success = _one_data['combo_success']
+            _created_time = _one_data['createdTime']
             _success_rate = round(float(_one_data['success_rate'].replace('%',''))/100,4)
             score = round((score+_score*_count)/(_count+1)+SUCCESS_BASIC*(_combo_success+1)*_success_rate,2)
             address = get_ip_addr_03(ip)
             address = _address if address == 'unknown' else address
             success_rate = round(1-(_f_count/(_count+1)),3)
             stability = round(score*(_count+1)*success_rate/PRECISION,4)
+            data['fail_count'] = _f_count
+            data['createdTime'] = _created_time
             data['combo_fail'] = 0
             data['address'] = address
             data['score'] = score

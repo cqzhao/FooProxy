@@ -27,6 +27,7 @@ class Database(object):
         self.passwd = settings['passwd']
         self.type   = settings['backend']
         self.db     = settings['database']
+        self.connected = False
         self.conn    = None
         self.handler = None
         self.table   = None
@@ -40,6 +41,7 @@ class Database(object):
         else:
             self.conn = pymongo.MongoClient(self.host, self.port)
         self.handler = self.conn[self.db]
+        self.connected = True
 
     def close(self):
         """
@@ -62,7 +64,7 @@ class Database(object):
         :param tname: 数据集(collection)
         :param format:对数据进行格式化的函数，可以根据数据结构自定义
         """
-        table = self.table if self.table else tname
+        table = tname if tname else self.table
         format = None if not isfunction(format) else format
         if not table:
             raise Exception('No table or data collection specified by tname.')
@@ -87,7 +89,7 @@ class Database(object):
         :param sort: 排序规则，MongoDB标准，使用dict类型
         :return: 返回查询结果 [{},{},..] 类型
         """
-        table = self.table if self.table else tname
+        table = tname if tname else self.table
         if not isinstance(condition,dict):
             raise TypeError('condition is not a valid dict type param.')
         else:
@@ -111,7 +113,7 @@ class Database(object):
         """
         if not condition: return
         conditions = self.__gen_mapped_condition(condition)
-        table = self.table if self.table else tname
+        table = tname if tname else self.table
         if not isinstance(condition,dict):
             raise TypeError('condition is not a valid dict type param.')
         self.handler[table].delete_many(conditions)
@@ -123,7 +125,7 @@ class Database(object):
         :param data: 更新数据 dict类型
         :param tname: 要更新的数据所在的数据集合名
         """
-        table = self.table if self.table else tname
+        table = tname if tname else self.table
         if not data :return
         if not isinstance(condition, dict) and not isinstance(data,dict):
             raise TypeError('Params (condition and data) should both be the dict type.')
@@ -136,7 +138,7 @@ class Database(object):
         :param tname: 数据集合名
         :return: 所有该集合的数据 格式:[{},{},..]
         """
-        table = self.table if self.table else tname
+        table = tname if tname else self.table
         data = list(self.handler[table].find())
         return data
 

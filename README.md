@@ -21,7 +21,7 @@
 > * APIserver
 >>  一个简单的代理API接口服务器，使用Flask实现，可以自己按需求写路由逻辑。这部分当然可以独立出来写，只是集成写在了项目里面。
 > * components
->> 项目的主要运行部分，采集器、验证器、打分检测等功能实现的模块。
+>> 项目的主要运行部分，采集器、验证器、触手、打分检测等功能实现的模块。
 > * **config**
 >> 其中的DBsettings是数据库的设置，用户名密码之类的，以及存储的数据库名，还有备用有效数据库(standby)的自定义名字和高分稳定数据库(stable)的自定义名字。config文件是整个项目的主要参数配置，可以设置采集器采集间隔、验证器的抓取验证数量间隔和协程并发极值等。
 > * const
@@ -49,7 +49,7 @@
 
 实现步骤：
 
-![实现步骤](https://github.com/01ly/FooProxy/blob/master/pic/works.png)
+![实现步骤](https://github.com/01ly/FooProxy/blob/master/pic/workss.png)
 
 1.**采集数据(Collector)**
 
@@ -96,6 +96,24 @@ my_crawlers = []
 当验证器的有效数据经过打分器存进本地standby数据库中后，怎么保证这一次存进去的数据以后能保证调用时仍可用呢？使用扫描器周期循环检测！扫描器会在你给定的
 扫描周期间隔不断地对本地standby数据库进行扫描验证，无效的数据则直接删除，有效的数据会对其得分、响应时间、验证时间等字段进行及时的更新，保证代理数据的实时有效。
 > 在扫描器内部其实也是有一个验证函数来进行扫描验证。详见scanner.py
+
+> **2018-11-05新增更新**:
+>  **目标代理IP库扫描验证(Tentacle-触手)**:
+
+> 可以在config中设置自己想要生成的只对目标网站有效代理IP数据库，如config中:
+```python
+#使用代理IP的爬虫目标网站列表 
+targets = [
+    'https://segmentfault.com/',
+    'https://www.csdn.net/',
+    'https://www.bilibili.com/',
+    'http://www.acfun.cn/'
+]
+```
+> 那么在数据库中便会有对应的有效IP代理库:segmentfault_com,csdn_net,bilibili_com,acfun_cn。
+
+目标代理IP库扫描使用协程，当采集器采集数据通过验证器验证有效后，会把有效代理IP传入验证器内置的Tentacle进行目标网站url有效性验证，验证通过则存入对应的目标库。当
+workstation的触手Tentacle开启时，会把指定的目标库进行扫描验证，评分更新或者删除。
 
 5.**择优剔劣(Detector)**
 
@@ -146,6 +164,8 @@ root = 'http://localhost:5000'
 root+'/proxy/<string:kind>'
 # 请求代理 直接返回一个高匿代理
 root+'/proxy'
+# 请求代理 返回所有满足条件的目标库IP代理数据 条件可自己在APIserver的路由函数中编辑
+root+'/proxy/target/<string:domain>/<string:suffix>'
 ```
 可以在apiserver.py中自己实现路由。
 ## 评分
@@ -161,17 +181,99 @@ root+'/proxy'
 * 可以先进行自定义的模式，在config中进行配置,可以运行单独的模块进行测试，如：
 ```python
  #运行模式,置 1 表示运行，置 0 表示 不运行,全置 0 表示只运行 API server
- MODE = {
-   'Collector' : 1,    #代理采集
-   'Validator' : 1,    #验证存储
-   'Scanner'   : 1,    #扫描本地库
-   'Detector'  : 1,    #高分检测
- }
+MODE = {
+    'Collector' : 1,    #代理采集
+    'Validator' : 1,    #验证存储
+    'Scanner'   : 1,    #扫描本地库
+    'Detector'  : 1,    #高分检测
+    'Tentacle'  : 1,    #目标库验证扫描
+}
  ```
  * 按照自己需求更改评分量（const.setting中,默认不用更改）
  * 可以在config中配置好数据库设置
  * 配置后可以直接在DOS或Pycharm等有标准stdout的环境下运行`python main.py`
  * 运行一段时间就可以看到稳定的效果
+ 
+ ## 示例 
+ * 背景：小马要爬取[segmentfault](https://segmentfault.com/),[CSDN](https://www.csdn.net/)中的技术文章,可是爬了一段时间老是被目标网站检测到自己爬虫的机器行为，IP被封了。此时小马想要自己建个IP代理池，用来更换IP爬取，这样也可以把采集数据堆出来
+ * 小马下载了FooProxy，并且根据使用提示安装好了对应的库和环境
+ * 小马根据自己MongoDB数据库账户设置对config中的DBsettings.py的数据库相关参数进行了对应设置
+ * 小马对config中的targets进行设置，把自己要爬取的目标网站列进去:
+ ```python
+targets = [
+    'https://segmentfault.com/',
+    'https://www.csdn.net/',
+]
+```
+ * 小马想要的IP代理数据是这样的：
+ > 1. 代理IP对目标网站有效，而且代理IP的分数要在60分以上，已经被检测了10次以上
+ > 2. 代理IP验证失败可以重试5次，仍然失败则证明该IP无效，等待回应超过30秒则认为失败
+ > 3. 代理池对以前自己设置生成的其他目标网站的目标库不进行验证
+ > 4. 代理IP一次验证最多300条，验证完再验证下一个300条
+ 根据上面的需求，小马配置了config对应参数如下:
+ ```python
+#目标库验证失败重试次数,-1 表示无限次失败重试,0 表示不进行失败重试
+RETRIES = 5
+#目标库验证请求的超时时间 单位：秒
+TIMEOUT = 30
+#是否要扫描验证以前的目标网站IP代理库
+AGO = False
+#验证目标库一次最多验证的条数
+MAX_V_COUNT = 300
+```
+> 根据需求的第一条，小马在APIserver中编写了路由函数:
+```python
+@app.route('/proxy/target/<string:domain>/<string:suffix>/')
+@app.route('/proxy/target/<string:domain>/<string:suffix>')
+def get_target_proxy(domain,suffix):
+    #定义查询返回条件
+    query = {'score':{'>=':60},'test_count':{'>=':10}}
+    #按照分数降序排列
+    sort_by = {'score':-1}
+    db_name = '_'.join([domain.lower().strip(),suffix.lower().strip()])
+    if db_name in common_db.handler.list_collection_names():
+        proxies = common_db.select(query,tname=db_name,sort=sort_by)
+        for i in proxies:
+            del i['_id']
+        return json.dumps(proxies)
+    else:
+        return 'Wrong domain or suffix you requested.'
+```
+* 小马在本机运行FooProxy，过了5分钟后，MongoDB数据库中出现了两个collection: segmentfault_com,csdn_net
+* 小马在本机运行爬虫，在自己的爬虫中使用API: ‘http://127.0.0.1:5000/proxy/target/csdn/net’，
+获取到了所有满足条件的代理IP,格式如下:
+```json
+[
+    {
+        "ip":"180.183.135.46",
+        "port":"8080",
+        "anony_type":"透明",
+        "address":"泰国 ",
+        "createdTime":"2018-11-07 18:30:22",
+        "score":75.27,
+        "test_count":10,
+        "url":"https://www.csdn.net/",
+        "total":752.7,
+        "resp_time":"1.829105s",
+        "valid_time":"2018-11-07 19:52:29"
+    },
+    {
+        "ip":"46.21.74.130",
+        "port":"8080",
+        "anony_type":"高匿",
+        "address":"俄罗斯 ",
+        "createdTime":"2018-11-07 18:25:36",
+        "score":75.05,
+        "test_count":11,
+        "url":"https://www.csdn.net/",
+        "total":825.55,
+        "resp_time":"7.812447s",
+        "valid_time":"2018-11-07 19:52:35"
+    }
+]
+```
+* 小马在爬虫中根据自己需求选择了代理IP数据中的一个进行后续爬取
+ 
  ## 不足
  * 稳定性没有很好的标准判断，不过100次测试85%以上的成功率就已经很好了
  * ~~没有编写验证器与API服务器的超时请求代理功能~~
@@ -184,9 +286,12 @@ root+'/proxy'
  ![备用有效数据库](https://github.com/01ly/FooProxy/blob/dev/pic/2018-10-09_2-07-47.png)
  2. **高分稳定数据库**
  ![高分稳定数据库](https://github.com/01ly/FooProxy/blob/dev/pic/2018-10-09_2-09-42.png)
+ 3. **目标代理IP库(csdn为例)**
+ ![目标代理IP库](https://github.com/01ly/FooProxy/blob/dev/pic/2018-11-05-21-03.png)
  ## 后话
  * 比较符合预期
  * 经过连续5天的测试，程序运行正常
  * 备用有效数据库与高分稳定数据库的同步更新误差在5分钟左右
  * 只有一个数据采集爬虫的情况下，一个小时采集一次，一次1000条数据[采集66ip代理网]，8个小时内稳定的有效代理995左右，高分稳定的有200条左右，主要在于代理网站的质量
  * 经过并发爬虫测试，可以使用到实际项目中
+ 
