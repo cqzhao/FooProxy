@@ -287,7 +287,7 @@ def get_target_proxy(domain,suffix):
  2. **高分稳定数据库**
  ![高分稳定数据库](https://github.com/01ly/FooProxy/blob/dev/pic/2018-10-09_2-09-42.png)
  3. **目标代理IP库(csdn为例)**
- ![目标代理IP库](https://github.com/01ly/FooProxy/blob/dev/pic/2018-11-05-21-03.png)
+ ![目标代理IP库](https://github.com/01ly/FooProxy/blob/master/pic/2018-11-05-21-03-00.png)
  ## 后话
  * 比较符合预期
  * 经过连续5天的测试，程序运行正常
