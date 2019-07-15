@@ -22,6 +22,10 @@ IP_check_url_03		= 'http://whois.pconline.com.cn/ip.jsp?ip='
 #采集器内置爬虫采集地址
 builtin_crawl_urls 	= {
     #count 表示爬取数量
+    'nyloner':{
+        'url':'https://www.nyloner.cn/proxy',
+        'count':1000,
+    },
     #其需要的追加参数在下面设置,详见_66ip_params
     '66ip':{
         'url':'http://www.66ip.cn/nmtq.php',
@@ -39,15 +43,15 @@ _66ip_params = {
     #运营商选择，0：全部运营商，1：中国电信，2：中国联通，3：中国移动，4：中国铁通
     'isp': 0,
     #匿名性选择，0：不限匿名性，1：透明代理，2：普通匿名，3：高级匿名，4：超级匿名
-    'anonymoustype': 0,
+    'anonymoustype': 4,
     #指定IP段
-    # 'start':,
+    'start':'',
     #指定端口
-    # 'ports':,
+    'ports':'',
     #排除端口
-    # 'export':,
+    'export':'',
     #指定地区
-    # 'ipaddress':,
+    'ipaddress':'',
     #过滤条件，0：国内外，1：国内，2：国外，
     'area': 0,
     #代理类型选择，0：http，1：https，2：全部，

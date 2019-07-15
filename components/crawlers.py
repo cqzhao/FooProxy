@@ -7,6 +7,9 @@
 import re
 import logging
 import requests
+from tools.util         import base64_decode
+from tools.util         import get_cookies
+from tools.util         import get_nyloner_params
 from const.settings     import headers
 from const.settings     import _66ip_params
 from const.settings     import builtin_crawl_urls   as _urls
@@ -33,4 +36,21 @@ def ip66():
         data = list(set(data))
         return data
 
-builtin_crawlers = [ip66,]
+def nyloner():
+    s       = requests.Session()
+    url     = _urls['nyloner']['url']
+    count   = _urls['nyloner']['count']
+    params  = get_nyloner_params(1,count)
+    try:
+        cookies = get_cookies(url, headers=headers)
+        __cookie = {'sessionid': cookies['sessionid']}
+        response = s.get(url,headers=headers,params=params,cookies=__cookie)
+    except Exception as e:
+        logger.error('Error class : %s , msg : %s ' % (e.__class__, e))
+    else:
+        crypted_data = response.json()
+        data = base64_decode(crypted_data['list'])
+        res = [':'.join([i['ip'],i['port']]) for i in data]
+        return res
+
+builtin_crawlers = [nyloner,]
