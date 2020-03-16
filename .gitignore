@@ -6,3 +6,4 @@ appengine-generated/
 *.egg-info
 dist
 build
+.vscode/settings.json

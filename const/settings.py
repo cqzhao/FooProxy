@@ -8,7 +8,7 @@
 import random
 
 #代理ip的API接口,此处用FooProxy的API接口
-proxy_api = 'http://127.0.0.1:5000/proxy'
+proxy_api = 'http://127.0.0.1:2020/proxy'
 
 #代理ip验证可用性验证接口
 proxy_validate_url 	= 'http://www.moguproxy.com/proxy/checkIp/ipList?ip_ports%5B%5D={}%3A{}'

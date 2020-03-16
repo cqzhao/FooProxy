@@ -61,7 +61,7 @@ class Workstation(object):
                 func.append(eval('self.'+RUN_FUNC[i]))
         [pool.apply_async(fun,args=(self.proxyList,)) for fun in func]
         pool.close()
-        app.run()
+        app.run(host='0.0.0.0',port=2020)
 
 
 
